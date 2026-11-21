@@ -1,0 +1,1026 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Gradios Cotizador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap">
+<style>
+/* Layout: claro y despejado. Una columna de pasos + un resumen con el precio que acompaña (abajo en celular, al costado en escritorio). */
+:root{
+  color-scheme: light;
+  --bg:#faf9fb; --card:#ffffff; --ink:#1f1b2e; --muted:#6b667a; --line:#e9e6ef; --soft:#f3f1f8;
+  --accent:#5b3fa0; --accent-d:#493185; --accent-soft:#f0ebfa;
+  --ok:#157a5a; --ok-bg:#e8f5ef; --warn:#7a5200; --warn-bg:#fdf3dc; --bad:#b3261e; --bad-bg:#fceceb; --info:#2f4a80; --info-bg:#eef2fb;
+  --d-giga:#6a4bb5; --d-esp:#2f9fa3; --d-laser:#e8892b; --d-offset:#d6354a; --d-sobres:#4a6fb0;
+  --f-head:"Poppins","Segoe UI",system-ui,sans-serif; --f-logo:"Fredoka","Poppins",system-ui,sans-serif; --f-body:"Nunito Sans","Segoe UI",system-ui,sans-serif;
+  --r:14px; --shadow:0 1px 2px rgba(31,27,46,.04),0 8px 24px -12px rgba(31,27,46,.12);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:3px solid #b9a5e6;outline-offset:2px}
+[hidden]{display:none!important}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+.demo-bar{background:var(--warn-bg);color:var(--warn);font-size:13px;font-weight:700;text-align:center;padding:8px 16px;line-height:1.35}
+/* ---------- header ---------- */
+.top{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;height:60px}
+.logo{display:flex;flex-direction:column;line-height:1;text-decoration:none;color:var(--accent-d)}
+.logo b{font-family:var(--f-logo);font-weight:700;font-size:26px;letter-spacing:-.4px}
+.logo small{font-size:7.5px;letter-spacing:.4em;text-transform:uppercase;color:var(--muted);margin-top:2px;padding-left:1px}
+.cartbtn{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font-weight:700;font-size:14px;min-height:44px}
+.cartbtn:hover{border-color:#cfc6e4}
+.cartbtn .count{background:var(--accent);color:#fff;min-width:22px;height:22px;border-radius:999px;display:grid;place-items:center;font-size:12px;padding:0 6px}
+.cartbtn .count.zero{background:var(--soft);color:var(--muted)}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding-top:12px;padding-bottom:0;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{white-space:nowrap;text-decoration:none;font-weight:700;font-size:14px;color:var(--muted);padding:9px 14px;border-radius:999px}
+.tabs a[aria-current="page"]{background:var(--accent-soft);color:var(--accent-d)}
+.tabs a:hover{color:var(--ink)}
+
+/* ---------- común ---------- */
+main{padding-block:22px 120px;min-height:70vh}
+h1,h2,h3{font-family:var(--f-head);margin:0;letter-spacing:-.01em;text-wrap:balance;line-height:1.2}
+.lead{color:var(--muted);margin:8px 0 0;max-width:56ch}
+.back{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:8px 0;margin-bottom:6px;color:var(--muted);font-weight:700;font-size:14px;text-decoration:none;min-height:40px}
+.back:hover{color:var(--ink)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--soft);color:var(--ink);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.btn{border:0;border-radius:12px;padding:14px 20px;font-weight:700;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;transition:background .12s,transform .08s}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-d)}
+.btn.ghost{background:var(--soft);color:var(--accent-d)}
+.btn.ghost:hover{background:#e9e4f4}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.note{display:flex;gap:10px;align-items:flex-start;border-radius:12px;padding:11px 13px;font-size:14px;line-height:1.45}
+.note svg{flex:none;margin-top:2px}
+.note.info{background:var(--info-bg);color:var(--info)}
+.note.warn{background:var(--warn-bg);color:var(--warn)}
+.note.bad{background:var(--bad-bg);color:#8a1c16}
+.note.ok{background:var(--ok-bg);color:#0d5a41}
+
+/* ---------- inicio ---------- */
+.hero{padding-block:18px 8px}
+.hero h1{font-size:clamp(30px,6vw,46px);font-weight:700}
+.search{position:relative;margin-top:20px;max-width:560px}
+.search input{width:100%;border:1px solid var(--line);border-radius:14px;padding:15px 16px 15px 46px;font-size:16px;background:#fff;box-shadow:var(--shadow);min-height:52px}
+.search input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(91,63,160,.12)}
+.search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.results{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px -16px rgba(31,27,46,.3);overflow:hidden;z-index:20}
+.results button{display:flex;width:100%;text-align:left;border:0;background:#fff;padding:12px 16px;gap:10px;align-items:center;border-bottom:1px solid var(--line);min-height:52px}
+.results button:last-child{border-bottom:0}
+.results button:hover{background:var(--soft)}
+.results .rp{margin-left:auto;color:var(--muted);font-size:13px;white-space:nowrap}
+.catlist{display:grid;gap:10px;margin-top:26px}
+.listrow{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;min-height:76px;transition:border-color .12s,box-shadow .12s}
+.listrow:hover{border-color:#cdc3e6;box-shadow:var(--shadow)}
+.listrow b{display:block;font-family:var(--f-head);font-weight:600;font-size:17px;line-height:1.25}
+.listrow span.s{display:block;color:var(--muted);font-size:14.5px;margin-top:2px;line-height:1.4}
+.listrow .from{font-size:13px;color:var(--muted);white-space:nowrap;text-align:right}
+.listrow .from b{display:block;font-family:var(--f-body);font-weight:800;font-size:15px;color:var(--ink)}
+.listrow .chev{color:#b4aec6}
+.prodrow{grid-template-columns:1fr auto}
+.homefoot{margin-top:28px;color:var(--muted);font-size:14px;display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---------- cotizador ---------- */
+.quote{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:36px;align-items:start;margin-top:8px}
+.qhead h1{font-size:clamp(26px,5vw,34px)}
+.what{margin:10px 0 0;font-size:17px;color:#3b3650;max-width:60ch;line-height:1.5}
+.qmeta{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.steps{display:grid;gap:30px;margin-top:26px}
+.step h3{font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px}
+.step h3 i{font-style:normal;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent-d);font-family:var(--f-body);font-weight:800;font-size:13px;flex:none}
+.step .help{margin:6px 0 0 36px;color:var(--muted);font-size:14.5px}
+.step .body{margin-top:12px;display:grid;gap:8px}
+.grp{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin:8px 0 0}
+.grp:first-child{margin-top:0}
+.opt{display:grid;grid-template-columns:22px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;min-height:60px;transition:border-color .1s,background .1s}
+.opt:hover{border-color:#cdc3e6}
+.opt .radio{width:20px;height:20px;border-radius:50%;border:2px solid #c9c3d8;display:grid;place-items:center;flex:none}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt[aria-pressed="true"] .radio{border-color:var(--accent);background:var(--accent);box-shadow:inset 0 0 0 3px var(--accent-soft)}
+.opt b{font-weight:700;font-size:15.5px;line-height:1.3}
+.opt .sub{display:block;color:var(--muted);font-size:14px;line-height:1.4;margin-top:1px}
+.opt .pr{font-weight:800;font-size:14.5px;white-space:nowrap;text-align:right}
+.opt .pr small{display:block;font-weight:600;color:var(--muted);font-size:12px}
+.opt[disabled]{opacity:.5;cursor:not-allowed}
+.opt .tag{display:inline-block;margin-top:4px;font-size:12px;font-weight:800;color:var(--ok)}
+.changebtn{border:0;background:none;color:var(--accent);font-weight:700;font-size:14px;padding:6px 0;text-align:left;min-height:40px;width:max-content}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.two .opt{grid-template-columns:22px 1fr;align-items:start}
+.two .opt .radio{margin-top:2px}
+.tiers{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.tier{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;text-align:left;min-height:84px;display:flex;flex-direction:column;gap:2px}
+.tier:hover{border-color:#cdc3e6}
+.tier[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.tier .q{font-size:14px;color:var(--muted);font-weight:600}
+.tier .p{font-family:var(--f-head);font-weight:600;font-size:19px;letter-spacing:-.01em}
+.tier .u{font-size:13px;color:var(--muted)}
+.tier .best{font-size:12px;font-weight:800;color:var(--ok);margin-top:2px}
+.sizeRow{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end}
+.sizeRow .times{padding-bottom:13px;color:var(--muted);font-size:20px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>span{font-size:13px;font-weight:700;color:var(--muted)}
+.inp{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;width:100%;background:#fff;font-weight:700;font-size:18px;min-height:52px}
+.inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(91,63,160,.12)}
+.hint{font-size:14px;color:var(--muted);margin-top:2px}
+.hint b{color:var(--ink)}
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.presets button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font-size:14px;font-weight:700;color:var(--accent-d);min-height:40px}
+.presets button:hover{background:var(--accent-soft)}
+.stepper{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;width:max-content;background:#fff}
+.stepper button{border:0;background:var(--soft);width:52px;height:52px;font-size:22px;font-weight:700;color:var(--accent-d)}
+.stepper button:active{background:#e6e0f3}
+.stepper input{border:0;width:84px;text-align:center;font-weight:800;font-size:18px;height:52px;background:#fff}
+.stepper input:focus{outline:none}
+.check{display:grid;grid-template-columns:24px 1fr auto;gap:12px;align-items:center;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;min-height:60px}
+.check:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.check input{width:22px;height:22px;accent-color:var(--accent)}
+.check b{font-size:15.5px}
+.check .sub{display:block;color:var(--muted);font-size:14px;line-height:1.4}
+.check .pr{font-weight:800;font-size:14.5px;white-space:nowrap}
+details.roll{border:1px solid var(--line);border-radius:12px;background:#fff}
+details.roll summary{padding:12px 14px;font-weight:700;font-size:14px;color:var(--accent);cursor:pointer;min-height:44px;display:flex;align-items:center}
+details.roll .in{padding:4px 14px 14px;display:grid;gap:10px;justify-items:start}
+
+/* resumen */
+.summary{position:sticky;top:84px;padding:22px}
+.summary .eyebrow{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.summary h2{font-size:18px;margin:6px 0 4px}
+.summary .spec{margin:0;color:var(--muted);font-size:14px}
+.lines{list-style:none;margin:16px 0 0;padding:14px 0 0;border-top:1px solid var(--line);display:grid;gap:7px;font-size:14.5px}
+.lines li{display:flex;justify-content:space-between;gap:12px}
+.lines li span:last-child{font-weight:700;white-space:nowrap}
+.lines li.sub{color:var(--muted);font-size:13.5px}
+.total{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.total small{display:block;font-size:13px;color:var(--muted);font-weight:700}
+.total .big{font-family:var(--f-head);font-weight:700;font-size:40px;line-height:1.1;letter-spacing:-.02em;color:var(--ink)}
+.alt{font-size:13.5px;color:var(--muted);margin-top:6px}
+.eta{margin-top:14px;display:flex;gap:10px;align-items:flex-start;background:var(--soft);border-radius:12px;padding:11px 13px;font-size:14px}
+.eta svg{flex:none;margin-top:2px}
+.eta b{display:block}
+.summary .btn{margin-top:16px}
+
+/* barra inferior (celular) */
+.mbar{display:none}
+
+/* ---------- presupuesto (panel) ---------- */
+.scrim{position:fixed;inset:0;background:rgba(31,27,46,.4);z-index:50}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:#fff;z-index:51;display:flex;flex-direction:column;box-shadow:-20px 0 40px -24px rgba(0,0,0,.35);animation:slide .2s ease}
+@keyframes slide{from{transform:translateX(24px);opacity:.4}to{transform:none;opacity:1}}
+.dh{padding:16px 20px;padding-top:max(16px,env(safe-area-inset-top,0px));border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.dh h2{font-size:20px}
+.dh .x{margin-left:auto;border:0;background:var(--soft);width:44px;height:44px;border-radius:50%;font-size:22px;color:var(--ink)}
+.db{padding:18px 20px;overflow:auto;flex:1;display:grid;gap:16px;align-content:start}
+.df{padding:14px 20px;padding-bottom:max(14px,env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);display:grid;gap:8px;background:#fff}
+.item{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:14px;border:1px solid var(--line);border-radius:12px}
+.item b{font-size:15px}
+.item p{margin:0;color:var(--muted);font-size:13.5px}
+.item .ip{font-weight:800;white-space:nowrap}
+.item .rm{grid-column:2;grid-row:2;justify-self:end;border:0;background:none;color:var(--bad);font-size:13px;font-weight:700;padding:8px 0 0;min-height:36px}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--soft);border-radius:12px;padding:4px;gap:4px}
+.seg button{border:0;background:transparent;border-radius:9px;padding:10px 8px;font-weight:700;font-size:14px;color:var(--muted);line-height:1.25;min-height:52px}
+.seg button small{display:block;font-weight:600;font-size:12.5px}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--accent-d);box-shadow:0 1px 4px rgba(31,27,46,.12)}
+.sum{display:grid;gap:6px;font-size:15px}
+.sum div{display:flex;justify-content:space-between}
+.sum .gt{font-family:var(--f-head);font-weight:700;font-size:26px;margin-top:6px;padding-top:10px;border-top:1px solid var(--line)}
+details.cond{font-size:14px;color:var(--muted);background:var(--soft);border-radius:12px;padding:12px 14px}
+details.cond summary{font-weight:700;color:var(--ink);cursor:pointer;min-height:28px}
+details.cond div{margin-top:8px}
+.empty{text-align:center;padding:48px 10px;color:var(--muted)}
+.empty b{display:block;font-family:var(--f-head);font-size:19px;color:var(--ink);margin-bottom:6px}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:max(90px,calc(env(safe-area-inset-bottom,0px) + 90px));background:var(--ink);color:#fff;padding:12px 14px 12px 18px;border-radius:14px;font-weight:700;z-index:80;max-width:calc(100% - 32px);font-size:14.5px;display:flex;gap:14px;align-items:center;box-shadow:0 14px 30px -10px rgba(0,0,0,.4);animation:up .2s ease}
+.toast button{border:0;background:#fff;color:var(--accent-d);font-weight:800;border-radius:9px;padding:8px 12px;font-size:13.5px;white-space:nowrap;min-height:38px}
+@keyframes up{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* ---------- preparar archivo ---------- */
+.stack{display:grid;gap:14px;margin-top:22px;max-width:760px}
+.acc{padding:0;overflow:hidden}
+.acc summary{list-style:none;cursor:pointer;padding:18px 20px;display:flex;align-items:center;gap:12px;min-height:64px}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary h2{font-size:17px;flex:1}
+.acc summary small{display:block;font-family:var(--f-body);font-weight:400;color:var(--muted);font-size:14px;margin-top:2px;letter-spacing:0}
+.acc summary .chev{transition:transform .15s;color:#a59fb8}
+.acc[open] summary .chev{transform:rotate(90deg)}
+.acc .in{padding:0 20px 20px;display:grid;gap:12px}
+.ck{display:grid;grid-template-columns:24px 1fr;gap:12px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;cursor:pointer;background:#fff;min-height:56px}
+.ck input{width:22px;height:22px;accent-color:var(--ok);margin-top:1px}
+.ck b{font-size:15px;display:block;line-height:1.35}
+.ck span{color:var(--muted);font-size:14px;line-height:1.4}
+.ck:has(input:checked){background:#f5fbf8;border-color:#c5e8d8}
+.progress{height:6px;background:var(--soft);border-radius:999px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--ok);transition:width .25s}
+.drop{border:2px dashed #cfc6e4;border-radius:14px;padding:26px 16px;text-align:center;background:var(--soft);cursor:pointer;display:block}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop b{display:block;color:var(--accent-d);font-size:15.5px}
+.drop span{font-size:13.5px;color:var(--muted)}
+.sl{display:grid;grid-template-columns:20px 1fr 48px;gap:10px;align-items:center;font-weight:800;font-size:14px}
+.sl input{width:100%;min-height:36px;accent-color:var(--accent)}
+.sl output{text-align:right}
+.swatch{height:64px;border-radius:12px;display:flex;align-items:center;padding:0 16px;font-weight:800;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+
+/* ---------- panel imprenta ---------- */
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
+.kpi{padding:16px 18px}
+.kpi small{display:block;font-size:13px;font-weight:700;color:var(--muted)}
+.kpi b{font-family:var(--f-head);font-weight:700;font-size:32px;line-height:1.2}
+.kpi.alert b{color:var(--bad)}
+.admin{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;margin-top:20px;align-items:start}
+.panel{padding:20px}
+.panel h2{font-size:19px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-weight:700;font-size:14px;min-height:40px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip small{opacity:.8;font-weight:700}
+.job{display:grid;grid-template-columns:1fr auto;gap:6px 14px;padding:14px 0;border-top:1px solid var(--line)}
+.job:first-of-type{border-top:0}
+.job b{font-size:15px}
+.job .t{color:var(--muted);font-size:14px}
+.job .r{text-align:right;font-weight:800}
+.job .acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.st{display:inline-block;border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:800}
+.st-0{background:var(--accent-soft);color:var(--accent-d)}.st-1{background:var(--info-bg);color:var(--info)}.st-2{background:var(--warn-bg);color:var(--warn)}.st-3{background:var(--ok-bg);color:var(--ok)}.st-4{background:#ececf1;color:#555}.st-5{background:var(--bad-bg);color:var(--bad)}
+.mini{border:0;border-radius:10px;padding:9px 14px;font-weight:700;font-size:13.5px;background:var(--soft);color:var(--accent-d);min-height:40px}
+.mini.go{background:var(--accent);color:#fff}
+.mini.no{background:var(--bad-bg);color:var(--bad)}
+.flag{display:block;margin-top:4px;font-size:13px;font-weight:700;color:var(--bad)}
+.cancelbox{grid-column:1/-1;background:var(--bad-bg);border-radius:12px;padding:12px;display:grid;gap:8px;font-size:14px;color:#7a1710}
+.cancelbox input{border:1.5px solid #efb6b1;border-radius:10px;padding:10px 12px;width:100%;background:#fff;min-height:46px}
+.pricerow{display:grid;grid-template-columns:1fr auto auto;gap:12px;font-size:14px;padding:9px 0;border-bottom:1px solid var(--line);align-items:center}
+.pricerow s{color:var(--muted)}
+.demo{display:inline-block;font-size:11.5px;font-weight:800;background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:2px 8px;text-transform:uppercase;letter-spacing:.06em;vertical-align:middle;margin-left:8px}
+
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:14px;padding-block:28px 40px}
+footer .wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+footer h4{margin:0 0 6px;color:var(--ink);font-size:14px}
+footer p{margin:0 0 3px}
+
+@media (max-width:900px){
+  .quote{grid-template-columns:minmax(0,1fr);gap:28px}
+  .summary{position:static}
+  .admin{grid-template-columns:minmax(0,1fr)}
+  .mbar.on{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;background:#fff;border-top:1px solid var(--line);padding:10px max(16px,env(safe-area-inset-right,0px)) max(10px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));gap:14px;align-items:center;box-shadow:0 -8px 24px -12px rgba(31,27,46,.2)}
+  .mbar small{display:block;font-size:12px;color:var(--muted);font-weight:700;line-height:1.1}
+  .mbar b{font-family:var(--f-head);font-size:23px;line-height:1.2}
+  .mbar .btn{margin-left:auto;padding:12px 18px;min-height:50px}
+  .toast{bottom:max(88px,calc(env(safe-area-inset-bottom,0px) + 88px))}
+  footer .wrap{grid-template-columns:1fr;gap:16px}
+}
+@media (max-width:560px){
+  main{padding-top:14px}
+  .two{grid-template-columns:1fr}
+  .cartbtn .lbl{display:none}
+  .kpis{gap:8px}
+  .kpi{padding:12px 14px}
+  .kpi b{font-size:26px}
+  .listrow{padding:14px;gap:12px}
+  .total .big{font-size:36px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="demo-bar" role="note">Demo hecha con la lista de precios de agosto 2026. Los precios no están actualizados.</div>
+<header class="top">
+  <div class="wrap bar">
+    <a class="logo" href="#/" aria-label="Gradios, inicio"><b>Gradios</b><small>Servicios Gráficos</small></a>
+    <button class="cartbtn" id="cartBtn" data-a="openCart" aria-label="Ver presupuesto">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
+      <span class="lbl">Mi presupuesto</span><span class="count num zero" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+<nav class="wrap tabs" id="tabs" aria-label="Secciones">
+  <a href="#/" data-tab="cotizar">Cotizar</a>
+  <a href="#/archivo" data-tab="archivo">Preparar mi archivo</a>
+  <a href="#/imprenta" data-tab="imprenta">Panel imprenta</a>
+</nav>
+
+<main class="wrap" id="app"></main>
+
+<footer>
+  <div class="wrap">
+    <div><h4>Gradios Servicios Gráficos</h4><p>27 de Abril 2176, Alto Alberdi</p><p>WhatsApp 351 8167397</p><p>imprentagradios@gmail.com</p></div>
+    <div><h4>Pagos</h4><p>Lista de agosto 2026 (demo).</p><p>Efectivo: precio de lista.</p><p>Transferencia, débito, crédito o cheque: 15% de recargo.</p><p>Precios sin IVA.</p></div>
+    <div><h4>Retiros y cancelaciones</h4><p>Con más de 30 días desde la fecha de entrega, el precio se actualiza a la lista vigente.</p><p>Para cancelar, escribinos por mail.</p></div>
+  </div>
+</footer>
+<div class="mbar" id="mbar"></div>
+<div id="sheet"></div>
+<div id="toastRoot"></div>
+
+<script>
+/* ============================== DATOS (Lista Agosto 2026) ============================== */
+const CATS = [
+  {id:'giga',  n:'Carteles, lonas y banners',  s:'Para tu local, vidriera o evento', dot:'var(--d-giga)'},
+  {id:'esp',   n:'Stickers y vinilos de corte', s:'Calcos, letras recortadas y vinilos especiales', dot:'var(--d-esp)'},
+  {id:'laser', n:'Copias e impresiones chicas', s:'Copias, carpetas, imanes, entradas y raspaditas', dot:'var(--d-laser)'},
+  {id:'offset',n:'Tarjetas y folletos',         s:'Para imprimir en cantidad y repartir', dot:'var(--d-offset)'},
+  {id:'sobres',n:'Sobres y talonarios',         s:'Papelería para tu negocio', dot:'var(--d-sobres)'},
+];
+const CATMAP = Object.fromEntries(CATS.map(c=>[c.id,c]));
+const RL = [.9,1,1.1,1.3,1.6,1.9,2.2,2.5,3.2];
+
+const P = [
+  /* ---------- Carteles, lonas y banners ---------- */
+  {id:'gig', cat:'giga', type:'roll', n:'Lona o vinilo a medida', short:'Lona o vinilo a medida',
+   what:'Tu diseño impreso en grande sobre lona, vinilo adhesivo o tela, al tamaño exacto que necesites.',
+   tech:['uv','eco'], urg:true, laq:true, file:'lona', days:{uv:[1,2],eco:[1,2]},
+   mats:[
+    {id:'lf', g:'Lonas', n:'Lona Front', u:'m2', uv:11000, eco:8500, rolls:RL, hint:'Lona estándar para carteles de exterior.'},
+    {id:'lb', g:'Lonas', n:'Lona Backlight', u:'m2', uv:13500, eco:11000, rolls:[.9,1,1.6,1.9,2.2], hint:'Para carteles con luz desde atrás.'},
+    {id:'lk', g:'Lonas', n:'Lona Blackout', u:'m2', uv:16000, eco:13000, rolls:[1,1.6], hint:'Opaca: no deja pasar la luz.'},
+    {id:'vb', g:'Vinilos adhesivos', n:'Vinilo blanco brillante', u:'m2', uv:11000, eco:8500, rolls:[1.07,1.27,1.52], hint:'Se pega sobre superficies lisas. Con brillo.'},
+    {id:'vm', g:'Vinilos adhesivos', n:'Vinilo blanco mate', u:'m2', uv:13500, eco:11000, rolls:[1.07,1.27,1.52], hint:'Se pega sobre superficies lisas. Sin brillo.'},
+    {id:'vt', g:'Vinilos adhesivos', n:'Vinilo transparente', u:'m2', uv:13500, eco:11000, rolls:[1.07,1.52], hint:'Para pegar sobre vidrio y que se vea a través.'},
+    {id:'vp', g:'Vinilos adhesivos', n:'Vinilo microperforado', u:'m2', uv:15500, eco:12000, rolls:[1.07,1.27,1.52], hint:'Para vidrieras: se ve la imagen desde afuera y se mira a través desde adentro.'},
+    {id:'vg', g:'Vinilos adhesivos', n:'Vinilo brillante base gris', u:'m2', uv:13500, eco:11000, rolls:[1.27,1.52], hint:'Tapa lo que haya debajo.'},
+    {id:'vh', g:'Otros materiales', n:'Vinilo holográfico', u:'ml', uv:19500, eco:17000, rolls:[1.27], hint:'Adhesivo con efecto brillante (silver, dorado o glitter).'},
+    {id:'tc', g:'Otros materiales', n:'Tela canvas', u:'ml', uv:19500, eco:16000, rolls:[1.07], hint:'Tela para cuadros y decoración.'},
+    {id:'pp', g:'Otros materiales', n:'Papel obra 80 g', u:'ml', uv:15500, eco:12000, rolls:[1.8], hint:'Papel liviano, para planos.'},
+   ]},
+  {id:'porta', cat:'giga', type:'unit', n:'Banner con estructura', short:'Banner con estructura',
+   what:'Un cartel impreso con su soporte, para pararlo solo en eventos, stands o dentro del local. Se arma y se guarda fácil.',
+   tech:['uv','eco'], file:'lona', days:{uv:[1,2],eco:[1,2]}, unitLbl:'unidades',
+   vars:[
+    {id:'velas', n:'Banner de 2 velas', s:'90 × 190 cm', uv:41500, eco:39000},
+    {id:'roll', n:'Roll Up', s:'85 × 200 cm. Se enrolla dentro de su base.', uv:59500, eco:57000},
+    {id:'arana', n:'Banner araña', s:'80 × 155 cm. Estructura en X, la más liviana.', uv:29500, eco:27000},
+    {id:'fp2', n:'Fondo de prensa chico', s:'200 × 200 cm', uv:115000},
+    {id:'fp3', n:'Fondo de prensa grande', s:'300 × 200 cm', uv:155000},
+   ]},
+  {id:'cart', cat:'giga', type:'unit', n:'Carteles rígidos', short:'Carteles rígidos',
+   what:'Carteles de plástico corrugado con tu diseño: livianos, rígidos y con 4 agujeros (ojales) para colgarlos.',
+   tech:['uv','eco'], file:'lona', days:{uv:[1,2],eco:[1,2]}, unitLbl:'carteles',
+   vars:[
+    {id:'c100', n:'Cartel de 100 × 68 cm', s:'Desde 11 unidades baja el precio.', uv:[[1,12500],[11,11500]], eco:[[1,10000],[11,9000]]},
+    {id:'c200', n:'Cartel de 200 × 100 cm', s:'Incluye 4 ojales.', uv:39500, eco:37000},
+   ]},
+  /* ---------- Stickers y vinilos de corte ---------- */
+  {id:'mc', cat:'esp', type:'roll', n:'Stickers y calcos con forma', short:'Stickers y calcos',
+   what:'Stickers o calcos con la forma de tu diseño: se imprime y se corta solo el contorno, listos para pegar.',
+   tech:['uv','eco'], urg:true, laq:false, file:'lona', days:{uv:[1,3],eco:[1,3]},
+   mats:[
+    {id:'mb', g:'Vinilos', n:'Vinilo brillante', u:'m2', uv:18500, eco:16000, rolls:[1.07,1.27,1.52]},
+    {id:'mm', g:'Vinilos', n:'Vinilo mate, transparente o base gris', u:'m2', uv:21500, eco:19000, rolls:[1.07,1.27,1.52]},
+    {id:'mh', g:'Otros materiales', n:'Vinilo holográfico', u:'ml', uv:27000, eco:24000, rolls:[1.14], hint:'Adhesivo con efecto brillante.'},
+   ]},
+  {id:'dtf', cat:'esp', type:'roll', n:'Transfer DTF UV', short:'Transfer DTF UV',
+   what:'Un sticker especial que se pasa a tazas, termos, vidrio u otros objetos rígidos y queda como una estampa.',
+   tech:['uv'], urg:false, laq:false, file:'img', days:{uv:[1,3]},
+   mats:[{id:'dtf', g:'', n:'DTF UV, rollo de 28 cm', u:'ml', uv:12000, rolls:[.28]}]},
+  {id:'vesp', cat:'esp', type:'roll', n:'Vinilos con efectos', short:'Vinilos con efectos',
+   what:'Vinilos especiales (holográfico, textura de pared, reflectivo) para decorar o señalizar. Mínimo 1 metro.',
+   tech:['uv'], urg:true, laq:false, file:'lona', days:{uv:[1,3]}, minMl:1,
+   mats:[
+    {id:'ht', g:'', n:'Holográfico transparente', u:'ml', uv:28000, rolls:[1.22]},
+    {id:'dc', g:'', n:'Decowall caviar', u:'ml', uv:28000, rolls:[1.22], hint:'Textura para paredes.'},
+    {id:'dq', g:'', n:'Decowall cuerina', u:'ml', uv:28000, rolls:[1.22], hint:'Textura para paredes.'},
+    {id:'dr', g:'', n:'Decowall revoque', u:'ml', uv:28000, rolls:[1.22], hint:'Textura para paredes.'},
+    {id:'dm', g:'', n:'Decowall madera', u:'ml', uv:28000, rolls:[1.22], hint:'Textura para paredes.'},
+    {id:'rf', g:'', n:'Reflectivo panal de abeja', u:'ml', uv:28000, rolls:[1.22], hint:'Refleja la luz. Para señalización.'},
+   ]},
+  {id:'corte', cat:'esp', type:'unit', n:'Letras y figuras en vinilo', short:'Letras y figuras',
+   what:'Letras o figuras recortadas en vinilo de un solo color, sin impresión. Muy usado en vidrieras y paredes.',
+   file:'vector', days:null, unitLbl:'metros', step:.5,
+   vars:[
+    {id:'e60', n:'Esmerilado, 60 cm de ancho', s:'Efecto vidrio esmerilado.', p:11000},
+    {id:'e90', n:'Esmerilado, 90 cm de ancho', s:'Efecto vidrio esmerilado.', p:15000},
+    {id:'e120', n:'Esmerilado, 120 cm de ancho', s:'Efecto vidrio esmerilado.', p:21000},
+    {id:'c60', n:'Color mate o brillante, 60 cm de ancho', p:11000},
+    {id:'c120', n:'Color mate o brillante, 120 cm de ancho', p:22000},
+   ]},
+  /* ---------- Copias e impresiones chicas ---------- */
+  {id:'a3', cat:'laser', type:'unit', n:'Copias e impresiones A3', short:'Copias A3',
+   what:'Impresiones a color en hojas A3 (el doble de una hoja común), de una sola o muchas copias.',
+   file:'print', days:[1,2], unitLbl:'hojas', mail:true,
+   vars:[
+    {id:'130f', n:'Papel liviano (130 g), solo frente', p:1200}, {id:'250f', n:'Papel medio (250 g), solo frente', p:1300}, {id:'350f', n:'Papel grueso (350 g), solo frente', p:1400},
+    {id:'130d', n:'Papel liviano (130 g), frente y dorso', p:2100}, {id:'250d', n:'Papel medio (250 g), frente y dorso', p:2300}, {id:'350d', n:'Papel grueso (350 g), frente y dorso', p:2500},
+    {id:'auto', n:'Autoadhesivo (sticker)', p:1400}, {id:'autoc', n:'Autoadhesivo con corte de contorno', p:2600},
+   ],
+   extras:[
+    {id:'lam1', n:'Laminado de 1 cara', s:'Brillante o mate. Protege y da terminación.', p:700},
+    {id:'lam2', n:'Laminado de 2 caras', s:'Brillante o mate.', p:1400},
+    {id:'cc', n:'Corte de la hoja', p:1600},
+    {id:'pl', n:'Plastificado', s:'Cubierta plástica rígida.', p:2600},
+   ]},
+  {id:'carp', cat:'laser', type:'tier', n:'Carpetas', short:'Carpetas',
+   what:'Carpetas A4 con tu diseño y bolsillo para guardar documentos. Sirven para presentar propuestas o catálogos.', file:'print', days:[1,2], unitLbl:'carpetas',
+   vars:[{id:'c', n:'Carpeta A4 con laminado y bolsillo', t:[[1,9300],[10,41000],[20,67000],[50,135000],[100,241000],[200,478000]]}]},
+  {id:'iman', cat:'laser', type:'tier', n:'Imanes', short:'Imanes',
+   what:'Imanes de 6 × 4 cm con tu marca para pegar en la heladera. Un clásico de la publicidad.', file:'print', days:null, unitLbl:'imanes',
+   vars:[{id:'i', n:'Imán de 6 × 4 cm', t:[[500,52000],[1000,92000]]}]},
+  {id:'fbn', cat:'laser', type:'tier', n:'Volantes blanco y negro', short:'Volantes blanco y negro',
+   what:'Volantes chicos (10 × 15 cm) en blanco y negro, para repartir en mano.', file:'print', days:null, unitLbl:'volantes',
+   vars:[{id:'f', n:'Solo frente', t:[[100,7000],[200,13000]]},{id:'fd', n:'Frente y dorso', t:[[100,11000],[200,17000]]}]},
+  {id:'rasp', cat:'laser', type:'tier', n:'Raspaditas', short:'Raspaditas',
+   what:'Tarjetas con una capa para raspar y descubrir un premio o descuento. Ideales para promos y sorteos.', file:'print', days:null, unitLbl:'raspaditas',
+   vars:[{id:'r', n:'Raspadita de 8,5 × 5 cm', t:[[150,26000],[300,47000],[500,75000]]}]},
+  {id:'ent', cat:'laser', type:'tier', n:'Entradas', short:'Entradas',
+   what:'Entradas para eventos de 15 × 6 cm, ya numeradas y con puntillado para separar el talón.', file:'print', days:null, unitLbl:'entradas',
+   vars:[{id:'350', n:'Papel grueso (350 g)', t:[[100,23000],[200,45000],[500,98000],[1000,148000]]},{id:'130', n:'Papel liviano (130 g)', t:[[100,19000],[200,38000],[500,82000],[1000,121000]]}]},
+  /* ---------- Tarjetas y folletos ---------- */
+  {id:'tarj', cat:'offset', type:'tier', n:'Tarjetas personales', short:'Tarjetas personales', modes:true,
+   what:'Las tarjetas de presentación de tu negocio, impresas en cantidad.', file:'print', unitLbl:'tarjetas',
+   extras:[{id:'perf', n:'Perforado', s:'Para separar con facilidad. Por millar.', p:11000, per:'mil'},{id:'pun', n:'Puntas redondeadas', p:6000, per:'once'}],
+   vars:[
+    {id:'c1', m:'comp', n:'Frente color, dorso en grises', s:'Barniz brillante en el frente.', t:[[500,17000],[1000,22000]], days:[7,10]},
+    {id:'c2', m:'comp', n:'Frente y dorso color', s:'Barniz brillante en el frente.', t:[[1000,30000]], days:[20,25]},
+    {id:'c3', m:'comp', n:'Mate, frente y dorso color', s:'Laminado mate en ambos lados.', t:[[1000,31000]], days:[20,25]},
+    {id:'c4', m:'comp', n:'Sectorizadas', s:'Laminado mate en ambos lados, con brillo en sectores.', t:[[1000,32000]], days:[20,25]},
+    {id:'e1', m:'excl', n:'Solo frente', s:'Laminado brillante o mate.', t:[[200,18000],[500,38700]], days:[1,2]},
+    {id:'e2', m:'excl', n:'Frente y dorso', s:'Laminado brillante o mate en ambos lados.', t:[[200,30000],[500,69000]], days:[1,2]},
+   ]},
+  {id:'fil', cat:'offset', type:'tier', n:'Folletos 10 × 15', short:'Folletos 10 × 15', modes:true,
+   what:'Folletos de 10 × 15 cm a todo color en papel con brillo, para repartir o dejar en el mostrador.', file:'print', unitLbl:'folletos',
+   vars:[
+    {id:'cf', m:'comp', n:'Frente color', t:[[1000,23000],[2000,35000],[4000,66000]], days:[7,10]},
+    {id:'cd', m:'comp', n:'Frente y dorso color', t:[[2000,42000],[4000,80000]], days:[7,10]},
+    {id:'ef', m:'excl', n:'Frente color', t:[[2000,148000],[4000,171000]], days:[7,10]},
+    {id:'ed', m:'excl', n:'Frente y dorso color', t:[[2000,198000],[4000,210000]], days:[7,10]},
+   ]},
+  {id:'fa4', cat:'offset', type:'tier', n:'Folletos A4', short:'Folletos A4',
+   what:'Folletos grandes, del tamaño de una hoja A4, a todo color por ambos lados. Para catálogos y promociones.', file:'print', unitLbl:'folletos',
+   vars:[{id:'a', m:'comp', n:'A4 a todo color, frente y dorso', s:'Pliego compartido.', t:[[1000,169000],[2000,222000],[5000,492000]], days:[7,10]}]},
+  {id:'obra', cat:'offset', type:'tier', n:'Volantes y hojas en papel común', short:'Papel común',
+   what:'Volantes u hojas membretadas en papel obra de 80 g, el papel común tipo cuaderno.', file:'print', unitLbl:'unidades',
+   extras:[{id:'emb', n:'Emblocado', s:'Pegado en tacos, para ir arrancando hojas.', p:5000, per:'once'}],
+   vars:[
+    {id:'fo', m:'comp', n:'Volantes 10 × 15, frente color', t:[[2000,23000]], days:[7,10]},
+    {id:'hm', m:'comp', n:'Hojas membretadas 20 × 30', t:[[2000,92000]], days:[7,10]},
+   ]},
+  /* ---------- Sobres y talonarios ---------- */
+  {id:'soi', cat:'sobres', type:'tier', n:'Sobres para carta', short:'Sobres para carta', what:'Sobres comunes (oficio inglés) con tu logo y tus datos impresos.', file:'print', days:null, unitLbl:'sobres',
+   vars:[{id:'1',n:'1 color',t:[[100,55000],[200,63000],[1000,107800]]},{id:'2',n:'2 colores',t:[[100,82000],[200,93000],[1000,147000]]},{id:'f',n:'Full color',t:[[100,139000],[200,154000],[1000,219000]]}]},
+  {id:'sba4', cat:'sobres', type:'tier', n:'Sobres bolsa A4', short:'Sobres bolsa A4', what:'Sobres grandes donde entra una hoja A4 sin doblar, impresos con tu marca.', file:'print', days:null, unitLbl:'sobres',
+   vars:[{id:'1',n:'1 color',t:[[100,63000],[250,66000]]},{id:'2',n:'2 colores',t:[[100,97000],[250,124000]]},{id:'f',n:'Full color',t:[[100,168000],[250,194000]]}]},
+  {id:'sbo', cat:'sobres', type:'tier', n:'Sobres bolsa oficio', short:'Sobres bolsa oficio', what:'Sobres bolsa un poco más grandes (tamaño oficio), impresos con tu marca.', file:'print', days:null, unitLbl:'sobres',
+   vars:[{id:'1',n:'1 color',t:[[100,73000],[250,107000]]},{id:'2',n:'2 colores',t:[[100,101000],[250,132000]]},{id:'f',n:'Full color',t:[[100,168000],[250,205000]]}]},
+  {id:'tal', cat:'sobres', type:'tier', n:'Talonarios', short:'Talonarios', what:'Talonarios de facturas, remitos o recibos, con original y duplicado. Cada uno trae 50 juegos.', file:'print', days:null, unitLbl:'talonarios',
+   vars:[{id:'t',n:'Medio oficio, impresión a 1 color',t:[[1,14000],[2,18000],[5,26000],[10,46000],[20,86000]]}]},
+  {id:'ta4', cat:'sobres', type:'tier', n:'Comprobantes A4', short:'Comprobantes A4', what:'Facturas, remitos o recibos sueltos tamaño A4, con original y duplicado.', file:'print', days:null, unitLbl:'juegos',
+   vars:[{id:'t',n:'A4, impresión a 1 color',t:[[100,26000],[200,29000],[500,79000],[1000,107000]]}]},
+  {id:'ind', cat:'sobres', type:'tier', n:'Manteles individuales', short:'Manteles individuales', what:'Manteles individuales de papel A3 para mesas de bares y restaurantes, impresos con tu marca.', file:'print', days:null, unitLbl:'individuales',
+   vars:[{id:'o',n:'Papel obra 80 g',t:[[2000,143000],[4000,259000]]},{id:'k',n:'Papel kraft 80 g',t:[[2000,138000],[4000,231000]]}]},
+];
+const PMAP = Object.fromEntries(P.map(p=>[p.id,p]));
+
+/* ============================== ESTADO ============================== */
+const S = {
+  cfg:{}, cart:[], pay:'efectivo', factura:false, cname:'',
+  mult:{giga:1,esp:1,laser:1,offset:1,sobres:1}, listName:'Agosto 2026',
+  ckDone:new Set(), tac:[40,30,20,100], quoteN:412, matOpen:{}, drawer:false,
+  ofilter:'activos', pcat:'giga', pct:0, cancelOpen:null, orders:[], route:'', prod:null,
+};
+const store={get(k,d){try{const v=localStorage.getItem('gradios2_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('gradios2_'+k,JSON.stringify(v))}catch(e){}}};
+S.cart=store.get('cart',[]);
+
+/* ============================== UTILIDADES ============================== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money=n=>'$ '+Math.round(n).toLocaleString('es-AR');
+const r100=n=>Math.round(n/100)*100;
+const price=(cat,raw)=>r100(raw*S.mult[cat]);
+const nf=(n,d=2)=>n.toLocaleString('es-AR',{maximumFractionDigits:d,minimumFractionDigits:0});
+const DOW=['dom','lun','mar','mié','jue','vie','sáb'];
+function addBiz(n){const d=new Date();d.setHours(12);let k=n;while(k>0){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)k--;}return d}
+const fdate=d=>`${DOW[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}`;
+function toast(msg,action){const r=$('#toastRoot');r.innerHTML=`<div class="toast" role="status"><span>${msg}</span>${action?`<button data-a="${action[1]}">${action[0]}</button>`:''}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>r.innerHTML='',4200)}
+const I={
+  info:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
+  ok:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
+  bad:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5h.01"/></svg>',
+  clock:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b3fa0" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  chev:'<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>',
+  back:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>',
+};
+const note=(k,t)=>`<div class="note ${k}">${I[k==='warn'?'bad':k]||I.info}<div>${t}</div></div>`;
+
+/* ============================== CÁLCULO ============================== */
+function cfg(p){
+  if(!S.cfg[p.id]){
+    const c={tech:'uv', var:0, qty:1, tier:0, extras:{}, urg:'normal', laq:false, mail:false, mode:'comp'};
+    if(p.type==='roll'){c.mat=p.mats[0].id;c.w=p.id==='dtf'?8:p.id==='mc'?10:p.id==='vesp'?100:200;c.h=p.id==='dtf'?8:p.id==='mc'?10:p.id==='vesp'?100:100;c.qty=p.id==='dtf'?30:p.id==='mc'?50:1;}
+    if(p.type==='unit'){c.qty=p.id==='a3'?20:(p.id==='corte'?2:1);}
+    if(p.modes){c.var=p.vars.findIndex(v=>v.m==='comp');}
+    S.cfg[p.id]=c;
+  }
+  return S.cfg[p.id];
+}
+function layout(wCm,hCm,qty,rolls){
+  const w=wCm/100,h=hCm/100; let best=null;
+  for(const R of [...rolls].sort((a,b)=>a-b)){
+    for(const [a,b] of [[w,h],[h,w]]){
+      if(a>R+1e-9) continue;
+      const per=Math.max(1,Math.min(qty,Math.floor((R+1e-9)/a))); const rows=Math.ceil(qty/per); const len=rows*b;
+      const waste=1-(qty*w*h)/(R*len); const c={R,a,b,per,rows,len,waste,panels:1};
+      if(!best||len*R<best.len*best.R-1e-9||(Math.abs(len*R-best.len*best.R)<1e-9&&R<best.R)) best=c;
+    }
+  }
+  if(best) return best;
+  const R=Math.max(...rolls), across=Math.min(w,h), along=Math.max(w,h), n=Math.ceil(across/R);
+  return {R,a:across/n,b:along,per:1,rows:n*qty,len:along*n*qty,waste:1-(qty*w*h)/(R*along*n*qty),panels:n};
+}
+function calc(p){
+  const c=cfg(p), cat=p.cat; const out={lines:[],total:0,title:p.n,spec:'',days:null,tech:null};
+  if(p.type==='roll'){
+    const m=p.mats.find(x=>x.id===c.mat)||p.mats[0];
+    const small=m.rolls.filter(R=>R<=1.9+1e-9);
+    const ecoOk=!!m.eco && small.length>0 && Math.min(c.w,c.h)/100<=Math.max(...small)+1e-9;
+    const tech=(c.tech==='eco'&&ecoOk)?'eco':'uv'; out.tech=tech; out.ecoOk=ecoOk; out.mat=m;
+    const rolls=tech==='eco'?small:m.rolls;
+    const lay=layout(c.w,c.h,c.qty,rolls); out.lay=lay;
+    const unit=price(cat,m[tech]); let base;
+    if(m.u==='m2'){const area=c.w*c.h/10000*c.qty; base=area*unit; out.area=area; out.lines.push([`${nf(area)} m² × ${money(unit)}`,base]);}
+    else{let ml=Math.ceil(lay.len*10-1e-9)/10; if(p.minMl&&ml<p.minMl){ml=p.minMl;} base=ml*unit; out.lines.push([`${nf(ml,1)} m de rollo × ${money(unit)}`,base]); out.ml=ml;}
+    let tot=base;
+    if(c.laq&&p.laq){const a=c.w*c.h/10000*c.qty, v=a*price('giga',6500); out.lines.push([`Laqueado (${nf(a)} m²)`,v]); tot+=v;}
+    if(p.urg&&c.urg!=='normal'){const pct=c.urg==='24'?1:.5, v=tot*pct; out.lines.push([`Urgente en ${c.urg} h (+${pct*100}%)`,v]); tot+=v;}
+    out.total=tot; out.spec=`${m.n}, ${nf(c.w)} × ${nf(c.h)} cm${c.qty>1?`, ${c.qty} piezas`:''}`;
+    out.days=c.urg==='24'?[0,1]:c.urg==='48'?[0,2]:p.days[tech]; out.qty=c.qty;
+  }
+  if(p.type==='unit'){
+    const v=p.vars[c.var]; const tech=(p.tech&&c.tech==='eco'&&v.eco!==undefined)?'eco':'uv'; out.tech=tech;
+    let raw=p.tech?v[tech]:v.p; if(Array.isArray(raw)) raw=[...raw].reverse().find(t=>c.qty>=t[0])[1];
+    const u=price(cat,raw), base=u*c.qty; out.lines.push([`${nf(c.qty,1)} ${p.unitLbl} × ${money(u)}`,base]); let tot=base;
+    const arr=p.tech?v[tech]:null; if(Array.isArray(arr)&&c.qty<11) out.hint=`Si pedís 11 o más, cada uno sale ${money(price(cat,arr[1][1]))}.`;
+    (p.extras||[]).forEach(e=>{if(c.extras[e.id]){const val=price(cat,e.p)*c.qty; out.lines.push([`${e.n} × ${nf(c.qty,1)}`,val]); tot+=val;}});
+    if(p.mail&&c.mail&&c.qty<50){out.lines.push(['Bajada por mail',100]); tot+=100;}
+    out.total=tot; out.spec=`${v.n}${p.tech?', '+(tech==='uv'?'UV':'ecosolvente'):''}`;
+    out.days=p.days?(Array.isArray(p.days)?p.days:p.days[tech]):null; out.qty=c.qty;
+  }
+  if(p.type==='tier'){
+    const v=p.vars[c.var]; if(c.tier>=v.t.length) c.tier=0;
+    const [q,raw]=v.t[c.tier]; const base=price(cat,raw);
+    out.lines.push([`${q.toLocaleString('es-AR')} ${p.unitLbl}`,base]); let tot=base;
+    (p.extras||[]).forEach(e=>{if(c.extras[e.id]){const n=e.per==='mil'?Math.ceil(q/1000):1; const val=price(cat,e.p)*n; out.lines.push([e.n+(e.per==='mil'&&n>1?` (${n} millares)`:''),val]); tot+=val;}});
+    out.total=tot; out.spec=`${v.n}${p.modes?(v.m==='comp'?', pliego compartido':', pliego exclusivo'):''}`;
+    out.days=v.days||p.days||null; out.qty=q;
+  }
+  return out;
+}
+
+/* ============================== RUTAS ============================== */
+function parse(){const h=location.hash.replace(/^#\/?/,''); const [a,b]=h.split('/'); return {a:a||'',b:b||''};}
+function render(){
+  const {a,b}=parse();
+  document.querySelectorAll('#tabs a').forEach(x=>x.removeAttribute('aria-current'));
+  let tab='cotizar', html='', bar=false;
+  if(a==='archivo'){tab='archivo'; html=viewFile();}
+  else if(a==='imprenta'){tab='imprenta'; html=viewAdmin();}
+  else if(a==='c'&&CATMAP[b]){html=viewCat(b);}
+  else if(a==='p'&&PMAP[b]){S.prod=b; html=viewQuote(PMAP[b]); bar=true;}
+  else html=viewHome();
+  document.querySelector(`#tabs [data-tab="${tab}"]`).setAttribute('aria-current','page');
+  $('#app').innerHTML=html;
+  $('#mbar').classList.toggle('on',bar);
+  if(bar) renderBar(); else $('#mbar').innerHTML='';
+  if(a==='archivo') initFile();
+  if(a==='imprenta') initAdmin();
+  if(a==='p') renderSummary();
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',()=>{render();});
+
+/* ============================== INICIO ============================== */
+function fromPrice(p){
+  let m;
+  if(p.type==='roll') m=Math.min(...p.mats.map(x=>x.eco||x.uv));
+  else if(p.type==='unit') m=Math.min(...p.vars.map(v=>{const r=p.tech?(v.eco??v.uv):v.p;return Array.isArray(r)?r[r.length-1][1]:r}));
+  else m=Math.min(...p.vars.map(v=>v.t[0][1]));
+  return price(p.cat,m);
+}
+function unitOf(p){return p.type==='roll'?(p.mats.every(m=>m.u==='ml')?' por metro':' por m²'):(p.type==='unit'?(p.id==='corte'?' por metro':' c/u'):'')}
+function viewHome(){
+  return `<section class="hero">
+    <h1>¿Qué querés imprimir?</h1>
+    <p class="lead">Elegí una opción, ajustá los detalles y mirá cuánto sale al instante.</p>
+    <div class="search">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Buscá: lona, tarjetas, stickers, sobres…" autocomplete="off" aria-label="Buscar producto">
+      <div class="results" id="results" hidden></div>
+    </div>
+  </section>
+  <div class="catlist">${CATS.map(c=>`<button class="listrow" data-a="go" data-to="#/c/${c.id}"><span class="dot" style="background:${c.dot}"></span><span><b>${c.n}</b><span class="s">${c.s}</span></span>${I.chev}</button>`).join('')}</div>
+  <div class="homefoot"><span class="pill">Lista de precios: ${esc(S.listName)}</span><span class="pill">Precios sin IVA</span></div>`;
+}
+function viewCat(id){
+  const c=CATMAP[id];
+  return `<a class="back" href="#/">${I.back} Inicio</a>
+  <h1>${c.n}</h1><p class="lead">${c.s}.</p>
+  <div class="catlist">${P.filter(p=>p.cat===id).map(p=>`<button class="listrow prodrow" data-a="go" data-to="#/p/${p.id}"><span><b>${esc(p.n)}</b><span class="s">${esc(p.what)}</span></span><span class="from">desde<b class="num">${money(fromPrice(p))}</b>${unitOf(p).trim()}</span></button>`).join('')}</div>`;
+}
+
+/* búsqueda */
+const IDX=[]; P.forEach(p=>{IDX.push({p,label:p.n,sub:'',mat:null}); if(p.type==='roll') p.mats.forEach(m=>IDX.push({p,label:m.n,sub:p.n,mat:m.id})); else if(p.vars.length>1) p.vars.forEach((v,i)=>IDX.push({p,label:v.n,sub:p.n,variant:i}));});
+const norm=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+const SYN={banner:'banner estructura roll',calco:'stickers calcos',sticker:'stickers calcos',etiqueta:'stickers',flyer:'folletos volantes',volante:'volantes folletos',factura:'talonarios comprobantes',remito:'talonarios comprobantes',cartel:'carteles lona',vidriera:'microperforado vinilo',taza:'dtf transfer',iman:'imanes',tarjeta:'tarjetas personales',logo:'letras figuras'};
+document.addEventListener('input',e=>{
+  if(e.target.id!=='q') return;
+  const q=norm(e.target.value.trim()); const box=$('#results'); if(q.length<2){box.hidden=true;return}
+  const extra=Object.entries(SYN).filter(([k])=>q.includes(k)).map(([,v])=>v).join(' ');
+  const terms=(q+' '+extra).split(/\s+/).filter(Boolean);
+  const sc=IDX.map((it,i)=>{const hay=norm(it.label+' '+it.sub+' '+it.p.what+' '+it.p.n);let s=0;terms.forEach(t=>{if(norm(it.label).includes(t))s+=3;else if(hay.includes(t))s+=1});return [s,i]}).filter(x=>x[0]>0).sort((a,b)=>b[0]-a[0]).slice(0,6);
+  box.innerHTML=sc.length?sc.map(([,i])=>{const it=IDX[i];return `<button data-a="pick" data-i="${i}"><span class="dot" style="background:${CATMAP[it.p.cat].dot}"></span><span>${esc(it.label)}${it.sub?`<br><small style="color:var(--muted)">${esc(it.sub)}</small>`:''}</span><span class="rp num">desde ${money(fromPrice(it.p))}</span></button>`}).join(''):`<div style="padding:14px 16px;color:var(--muted)">No encontramos "${esc(e.target.value)}". Probá con lona, vinilo, tarjetas o sobres.</div>`;
+  box.hidden=false;
+});
+
+/* ============================== COTIZADOR ============================== */
+function opt(attrs,on,title,sub,right,dis){return `<button class="opt" ${attrs} aria-pressed="${on}" ${dis?'disabled':''}><span class="radio"></span><span><b>${title}</b>${sub?`<span class="sub">${sub}</span>`:''}</span>${right?`<span class="pr">${right}</span>`:''}</button>`}
+function step(n,title,help,body){return `<section class="step"><h3><i>${n}</i>${title}</h3>${help?`<p class="help">${help}</p>`:''}<div class="body">${body}</div></section>`}
+const qtyBox=(p,c)=>`<div class="stepper"><button data-a="q" data-d="-1" aria-label="Menos">−</button><input id="qty" type="number" inputmode="decimal" min="${p.step||1}" step="${p.step||1}" value="${c.qty}" aria-label="Cantidad"><button data-a="q" data-d="1" aria-label="Más">+</button></div>`;
+
+function viewQuote(p){
+  const c=cfg(p), r=calc(p); let n=0, h='';
+  const cat=CATMAP[p.cat];
+  h+=`<a class="back" href="#/c/${p.cat}">${I.back} ${cat.n}</a>
+  <div class="quote"><div>
+    <div class="qhead"><h1>${esc(p.n)}</h1><p class="what">${esc(p.what)}</p></div>
+    <div class="steps" id="steps">`;
+
+  if(p.type==='roll'){
+    const groups=[...new Set(p.mats.map(m=>m.g))]; const open=S.matOpen[p.id]??(p.mats.length<=4); const sel=p.mats.find(m=>m.id===c.mat);
+    const row=m=>opt(`data-a="mat" data-id="${m.id}"`,m.id===c.mat,esc(m.n),esc(m.hint||''),`${money(price(p.cat,m[c.tech==='eco'&&m.eco?'eco':'uv']))}<small>${m.u==='m2'?'por m²':'por metro'}</small>`);
+    let body='';
+    if(p.mats.length===1) body=row(p.mats[0]);
+    else if(open) groups.forEach(g=>{if(g)body+=`<div class="grp">${esc(g)}</div>`; body+=p.mats.filter(m=>m.g===g).map(row).join('');});
+    else body=row(sel)+`<button class="changebtn" data-a="matopen">Ver los ${p.mats.length} materiales disponibles</button>`;
+    h+=step(++n,'Material',p.mats.length>1?`Hay ${p.mats.length} materiales disponibles.`:'',body);
+    if(p.tech.length>1) h+=step(++n,'Tipo de impresión','Es la tecnología con la que se imprime tu trabajo.',`<div id="techBox">${techBox(p,c,r)}</div>`);
+    h+=step(++n,p.id==='dtf'?'Tamaño de cada diseño':'¿De qué tamaño?',p.id==='dtf'?'Cargá el tamaño de uno solo y la cantidad total.':'Medida final impresa, en centímetros. 1 metro son 100 cm.',
+      `<div class="sizeRow"><label class="field"><span>Ancho (cm)</span><input class="inp num" id="w" type="number" inputmode="decimal" min="1" value="${c.w}"></label><span class="times">×</span><label class="field"><span>Alto (cm)</span><input class="inp num" id="h" type="number" inputmode="decimal" min="1" value="${c.h}"></label></div>
+       <div class="presets">${presets(p).map(([a,b])=>`<button data-a="preset" data-v="${a}x${b}">${a} × ${b}</button>`).join('')}</div>
+       <label class="field" style="margin-top:6px"><span>${p.id==='dtf'||p.id==='mc'?'Cantidad de diseños':'Cantidad de piezas iguales'}</span>${qtyBox(p,c)}</label>
+       <div id="sizeNote"></div>`);
+    if(p.laq||p.urg){
+      let b='';
+      if(p.laq) b+=`<label class="check"><input type="checkbox" id="laq" ${c.laq?'checked':''}><span><b>Laqueado</b><span class="sub">Una capa que protege la impresión del sol y la lluvia.</span></span><span class="pr" id="laqP"></span></label>`;
+      if(p.urg) b+=`<div class="grp" style="margin-top:6px">¿Para cuándo lo necesitás?</div><div class="two" style="grid-template-columns:1fr 1fr 1fr">${['normal','48','24'].map(u=>`<button class="opt" data-a="urg" data-id="${u}" aria-pressed="${c.urg===u}" style="grid-template-columns:1fr;min-height:68px"><span><b>${u==='normal'?'Sin apuro':u==='48'?'En 48 h':'En 24 h'}</b><span class="sub">${u==='normal'?'Plazo normal':u==='48'?'+50%':'+100%'}</span></span></button>`).join('')}</div>`;
+      h+=step(++n,'Extras','Opcionales.',b);
+    }
+  }
+
+  if(p.type==='unit'){
+    const unitCol=p.vars.map((v,i)=>{const t=(p.tech&&c.tech==='eco'&&v.eco!==undefined)?'eco':'uv'; let raw=p.tech?v[t]:v.p; const pr=Array.isArray(raw)?raw[0][1]:raw; return opt(`data-a="var" data-id="${i}"`,i===c.var,esc(v.n),esc(v.s||''),`${money(price(p.cat,pr))}<small>${p.id==='corte'?'por metro':'c/u'}</small>`)}).join('');
+    h+=step(++n,'Elegí una opción','',unitCol);
+    if(p.tech) h+=step(++n,'Tipo de impresión','Es la tecnología con la que se imprime tu trabajo.',`<div id="techBox">${techBox(p,c,r)}</div>`);
+    h+=step(++n,p.id==='corte'?'¿Cuántos metros?':'¿Cuántos necesitás?',p.id==='corte'?'Se cobra por metro lineal del ancho elegido.':'',qtyBox(p,c)+`<div id="hintBox"></div>`);
+    if(p.extras) h+=step(++n,'Terminaciones','Opcionales. Se cobran por hoja.',p.extras.map(e=>`<label class="check"><input type="checkbox" data-extra="${e.id}" ${c.extras[e.id]?'checked':''}><span><b>${esc(e.n)}</b>${e.s?`<span class="sub">${esc(e.s)}</span>`:''}</span><span class="pr" data-ep="${e.id}"></span></label>`).join(''));
+    if(p.mail) h+=step(++n,'¿Cómo nos mandás el archivo?','',`<label class="check"><input type="checkbox" id="mail" ${c.mail?'checked':''}><span><b>Por mail</b><span class="sub">Hay una bajada de $100 en pedidos de menos de 50 copias.</span></span><span></span></label>`);
+    if(p.id==='corte') h+=`<div>${note('info','No incluye el pelado del vinilo ni la colocación.')}</div>`;
+  }
+
+  if(p.type==='tier'){
+    if(p.modes){
+      const has=m=>p.vars.some(v=>v.m===m);
+      h+=step(++n,'Tipo de pliego','El pliego es la hoja grande en la que se imprime tu trabajo.',`<div class="two">
+        ${opt('data-a="mode" data-id="comp"',c.mode==='comp','Pliego compartido','Tu trabajo se imprime junto con otros en el mismo pliego. Pueden notarse leves variaciones de color.','')}
+        ${opt('data-a="mode" data-id="excl"',c.mode==='excl','Pliego exclusivo','Tu trabajo se imprime solo en el pliego.','',!has('excl'))}
+      </div>`);
+    }
+    const vs=p.vars.map((v,i)=>[v,i]).filter(([v])=>!p.modes||v.m===c.mode);
+    if(vs.length>1) h+=step(++n,p.id==='tarj'?'¿Cómo las querés?':'Elegí una opción','',vs.map(([v,i])=>opt(`data-a="var" data-id="${i}"`,i===c.var,esc(v.n),esc(v.s||'')+(v.days?`${v.s?' ':''}Listo en ${v.days[0]} a ${v.days[1]} días.`:''),'')).join(''));
+    h+=step(++n,'¿Cuántas necesitás?','',`<div class="tiers" id="tierBox">${tierBox(p,c)}</div>`);
+    if(p.extras) h+=step(++n,'Terminaciones','Opcionales.',p.extras.map(e=>`<label class="check"><input type="checkbox" data-extra="${e.id}" ${c.extras[e.id]?'checked':''}><span><b>${esc(e.n)}</b>${e.s?`<span class="sub">${esc(e.s)}</span>`:''}</span><span class="pr" data-ep="${e.id}"></span></label>`).join(''));
+  }
+  h+=`</div></div><aside class="summary card" id="summary" aria-live="polite"></aside></div>`;
+  return h;
+}
+function presets(p){return p.id==='dtf'?[[5,5],[8,8],[10,6],[20,10]]:p.id==='vesp'?[[100,100],[122,200],[50,50]]:p.id==='mc'?[[5,5],[10,10],[20,10],[30,20]]:[[100,70],[180,90],[200,100],[300,150]]}
+function techBox(p,c,r){
+  if(p.type==='roll'){
+    const m=r.mat, sw=m.u==='m2'?'por m²':'por metro';
+    return `<div class="two">
+      ${opt('data-a="tech" data-id="uv"',r.tech==='uv','UV',`Se imprime en el plotter UV, que admite anchos de más de 1,90 m. ${money(price(p.cat,m.uv))} ${sw}.`,'')}
+      ${opt('data-a="tech" data-id="eco"',r.tech==='eco','Ecosolvente',`Se imprime en el plotter ecosolvente, hasta 1,90 m de ancho. ${m.eco?money(price(p.cat,m.eco))+' '+sw+'.':''}`,'',!r.ecoOk)}
+    </div>
+    ${!r.ecoOk&&m.eco?note('info','Ecosolvente se imprime hasta 1,90 m de ancho. Para esta medida, el trabajo se hace en UV.'):''}`;
+  }
+  const v=p.vars[c.var]; const ecoOk=v.eco!==undefined;
+  return `<div class="two">${opt('data-a="tech" data-id="uv"',r.tech==='uv','UV','Se imprime en el plotter UV.','')}${opt('data-a="tech" data-id="eco"',r.tech==='eco','Ecosolvente','Se imprime en el plotter ecosolvente.','',!ecoOk)}</div>${!ecoOk?`<div class="hint">Esta opción solo se hace en UV.</div>`:''}`;
+}
+function tierBox(p,c){
+  const v=p.vars[c.var]; if(c.tier>=v.t.length)c.tier=0;
+  const units=v.t.map(([q,pr])=>price(p.cat,pr)/q), best=Math.min(...units);
+  return v.t.map(([q,pr],i)=>`<button class="tier" data-a="tier" data-id="${i}" aria-pressed="${i===c.tier}"><span class="q">${q.toLocaleString('es-AR')} ${p.unitLbl}</span><span class="p num">${money(price(p.cat,pr))}</span><span class="u num">${money(price(p.cat,pr)/q)} c/u</span></button>`).join('');
+}
+
+/* actualizaciones en vivo (sin perder el foco al tipear) */
+function live(){
+  const p=PMAP[S.prod]; if(!p) return; const c=cfg(p), r=calc(p);
+  renderSummary(r); renderBar(r);
+  if(p.type==='roll'){
+    const el=$('#sizeNote'); if(el){
+      const L=r.lay, m=r.mat; let t='';
+      if(r.area) t+=`<div class="hint">Superficie total: <b>${nf(r.area)} m²</b></div>`;
+      else if(r.ml) t+=`<div class="hint">Se usan <b>${nf(r.ml,1)} metros</b> de rollo.</div>`;
+      if(L.panels>1) t+=note('warn',`Tu pieza es más ancha que el material (máx. ${nf(Math.max(...m.rolls))} m). Se imprime en <b>${L.panels} paños</b> que se unen al colocar.`);
+      if(L.panels===1&&L.waste>.18&&L.per*L.a<L.R-.05&&p.id!=='dtf') t+=note('info','Tu archivo no ocupa todo el ancho del rollo, así que puede combinarse con otros trabajos y demorar un poco.');
+      el.innerHTML=t;
+    }
+    const lp=$('#laqP'); if(lp) lp.textContent='+'+money(c.w*c.h/10000*c.qty*price('giga',6500));
+    const tb=$('#techBox'); if(tb&&document.activeElement&&!tb.contains(document.activeElement)) tb.innerHTML=techBox(p,c,r);
+  }
+  if(p.type==='unit'){const hb=$('#hintBox'); if(hb) hb.innerHTML=r.hint?note('info',r.hint):''; }
+  document.querySelectorAll('[data-ep]').forEach(el=>{const e=p.extras.find(x=>x.id===el.dataset.ep); let k=1; if(p.type==='unit')k=c.qty; else if(e.per==='mil')k=Math.ceil(p.vars[c.var].t[c.tier][0]/1000); el.textContent='+'+money(price(p.cat,e.p)*k);});
+}
+function etaHtml(r){
+  if(r.days){const a=addBiz(Math.max(r.days[0],1)), b=addBiz(Math.max(r.days[1],1));
+    const t=r.days[0]===0?(r.days[1]===1?'En menos de 24 horas':'En menos de 48 horas'):(r.days[0]===r.days[1]?`Listo en ${r.days[0]} días hábiles`:`Listo en ${r.days[0]} a ${r.days[1]} días hábiles`);
+    return `<div class="eta">${I.clock}<div><b>${t}</b>Aprox. entre el ${fdate(a)} y el ${fdate(b)}, desde que aprobás tu archivo.</div></div>`;}
+  return `<div class="eta">${I.clock}<div><b>Plazo a confirmar</b>Gradios te lo confirma al recibir el pedido.</div></div>`;
+}
+function renderSummary(r){
+  const el=$('#summary'); if(!el) return; const p=PMAP[S.prod]; r=r||calc(p); S.last=r;
+  el.innerHTML=`<div class="eyebrow">Tu cotización</div><h2>${esc(r.title)}</h2><p class="spec">${esc(r.spec)}</p>
+  <ul class="lines num">${r.lines.map(([k,v])=>`<li><span>${k}</span><span>${money(v)}</span></li>`).join('')}</ul>
+  <div class="total"><small>Total en efectivo, sin IVA</small><div class="big num">${money(r.total)}</div><div class="alt num">Con transferencia o tarjeta: ${money(r.total*1.15)} (+15%)</div></div>
+  ${etaHtml(r)}
+  <button class="btn primary block" data-a="add">Agregar al presupuesto</button>`;
+}
+function renderBar(r){
+  const b=$('#mbar'); if(!b||!S.prod||!b.classList.contains('on')) return; r=r||calc(PMAP[S.prod]);
+  b.innerHTML=`<div><small>Total en efectivo, sin IVA</small><b class="num">${money(r.total)}</b></div><button class="btn primary" data-a="add">Agregar</button>`;
+}
+
+/* ============================== EVENTOS ============================== */
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.search')){const r=$('#results'); if(r) r.hidden=true;}
+  const t=e.target.closest('[data-a]'); if(!t||t.disabled) return;
+  const a=t.dataset.a, d=t.dataset, p=S.prod&&PMAP[S.prod], c=p&&cfg(p);
+  const redo=()=>{const y=window.scrollY; const af=document.activeElement; render(); window.scrollTo(0,y);};
+  switch(a){
+    case 'go': location.hash=d.to; return;
+    case 'pick': {const it=IDX[+d.i]; const pc=cfg(it.p); if(it.mat)pc.mat=it.mat; if(it.variant!==undefined){pc.var=it.variant;pc.tier=0;if(it.p.modes)pc.mode=it.p.vars[it.variant].m;} S.matOpen[it.p.id]=false; location.hash='#/p/'+it.p.id; return;}
+    case 'mat': c.mat=d.id; S.matOpen[p.id]=false; redo(); return;
+    case 'matopen': S.matOpen[p.id]=true; redo(); return;
+    case 'tech': c.tech=d.id; redo(); return;
+    case 'urg': c.urg=d.id; redo(); return;
+    case 'var': c.var=+d.id; c.tier=0; redo(); return;
+    case 'tier': c.tier=+d.id; redo(); return;
+    case 'mode': c.mode=d.id; c.var=p.vars.findIndex(v=>v.m===d.id); c.tier=0; redo(); return;
+    case 'preset': {const [x,y]=d.v.split('x').map(Number); c.w=x; c.h=y; $('#w').value=x; $('#h').value=y; live(); return;}
+    case 'q': {const st=p.step||1; c.qty=Math.max(st,+(c.qty+ +d.d*st).toFixed(2)); $('#qty').value=c.qty; live(); return;}
+    case 'add': addToCart(); return;
+    case 'openCart': S.drawer=true; renderDrawer(); return;
+    case 'closeCart': S.drawer=false; $('#sheet').innerHTML=''; return;
+    case 'rm': S.cart=S.cart.filter(i=>i.id!=d.id); store.set('cart',S.cart); renderCartCount(); renderDrawer(); return;
+    case 'pay': S.pay=d.id; renderDrawer(); return;
+    case 'copy': copyQuote(); return;
+    case 'send': sendQuote(); return;
+    case 'toFile': S.drawer=false; $('#sheet').innerHTML=''; location.hash='#/archivo'; return;
+    case 'ofilter': S.ofilter=d.id; render(); return;
+    case 'adv': {const o=S.orders.find(x=>x.n==d.id); o.st++; if(o.st===3)o.due=new Date(); toast(`N° ${String(o.n).padStart(5,'0')}: ${STS[o.st]}`); render(); return;}
+    case 'can': S.cancelOpen=+d.id; render(); setTimeout(()=>$('#cmail')&&$('#cmail').focus(),0); return;
+    case 'cx': S.cancelOpen=null; render(); return;
+    case 'cconf': {const v=$('#cmail').value.trim(); if(!v){$('#cmail').focus();toast('Falta el mail del cliente. Sin mail, el trabajo sigue su proceso.');return} const o=S.orders.find(x=>x.n==d.id); o.st=5; o.job+=` · Cancelado por mail: ${v}`; S.cancelOpen=null; toast('Cancelación registrada.'); render(); return;}
+    case 'pcat': S.pcat=d.id; S.pct=0; render(); return;
+    case 'pub': publish(); return;
+    case 'tac': S.tac=d.v.split(',').map(Number); renderTac(); return;
+    case 'copyck': {const txt='Antes de enviar tu archivo a Gradios:\n'+CK.map(([b,s])=>`☐ ${b}`).join('\n'); navigator.clipboard.writeText(txt).then(()=>toast('Lista copiada. Pasásela a quien hace tu diseño.')).catch(()=>toast('No se pudo copiar automáticamente.')); return;}
+  }
+});
+document.addEventListener('input',e=>{
+  const t=e.target, p=S.prod&&PMAP[S.prod]; if(location.hash.indexOf('#/p/')!==0||!p) return; const c=cfg(p);
+  if(t.id==='w'||t.id==='h'){const v=+t.value; if(v>0){c[t.id]=v; live();}}
+  else if(t.id==='qty'){const v=+t.value; if(v>0){c.qty=v; live();}}
+  else if(t.id==='cname'){}
+});
+document.addEventListener('change',e=>{
+  const t=e.target, p=S.prod&&PMAP[S.prod];
+  if(t.id==='fac'){S.factura=t.checked; renderDrawer(); return;}
+  if(!p||location.hash.indexOf('#/p/')!==0) return; const c=cfg(p);
+  if(t.id==='laq') c.laq=t.checked;
+  else if(t.id==='mail') c.mail=t.checked;
+  else if(t.dataset.extra){c.extras[t.dataset.extra]=t.checked; if(t.checked&&t.dataset.extra==='lam1')c.extras.lam2=false; if(t.checked&&t.dataset.extra==='lam2')c.extras.lam1=false; if(p.id==='a3'){render();return;}}
+  else if(t.id==='w'||t.id==='h'||t.id==='qty'){render();return;}
+  else return;
+  live();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.drawer){S.drawer=false;$('#sheet').innerHTML='';}});
+
+function addToCart(){
+  const p=PMAP[S.prod], r=calc(p);
+  S.cart.push({id:Date.now(),title:r.title,spec:r.spec,total:r.total,days:r.days,cat:p.cat,file:p.file});
+  store.set('cart',S.cart); renderCartCount();
+  toast('Agregado al presupuesto',['Ver','openCart']);
+}
+
+/* ============================== PRESUPUESTO ============================== */
+function renderCartCount(){const n=S.cart.length; const el=$('#cartCount'); el.textContent=n; el.classList.toggle('zero',!n);}
+function totals(){const sub=S.cart.reduce((a,b)=>a+b.total,0);const rec=S.pay==='otros'?sub*.15:0;const iva=S.factura?(sub+rec)*.21:0;return {sub,rec,iva,tot:sub+rec+iva};}
+function renderDrawer(){
+  if(!S.drawer) return; const t=totals(), has=S.cart.length>0;
+  const lona=S.cart.some(i=>i.file==='lona'); const maxD=S.cart.reduce((a,i)=>i.days?Math.max(a,i.days[1]):a,0);
+  const keep=$('#cname')?$('#cname').value:S.cname; S.cname=keep||S.cname;
+  $('#sheet').innerHTML=`<div class="scrim" data-a="closeCart"></div>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-label="Mi presupuesto">
+    <div class="dh"><h2>Mi presupuesto</h2><span class="pill num">N° ${String(S.quoteN).padStart(5,'0')}</span><button class="x" data-a="closeCart" aria-label="Cerrar">×</button></div>
+    <div class="db">
+      ${has?S.cart.map(i=>`<div class="item"><b>${esc(i.title)}</b><span class="ip num">${money(i.total)}</span><p>${esc(i.spec)}</p><button class="rm" data-a="rm" data-id="${i.id}">Quitar</button></div>`).join(''):`<div class="empty"><b>Todavía no agregaste nada</b>Elegí un producto, ajustá los detalles y tocá “Agregar al presupuesto”.</div>`}
+      ${has?`
+      <div><div style="font-weight:700;font-size:14px;margin-bottom:8px">Forma de pago</div>
+        <div class="seg"><button data-a="pay" data-id="efectivo" aria-pressed="${S.pay==='efectivo'}">Efectivo<small>Precio de lista</small></button><button data-a="pay" data-id="otros" aria-pressed="${S.pay==='otros'}">Transferencia o tarjeta<small>+15%</small></button></div></div>
+      <label class="check" style="grid-template-columns:24px 1fr"><input type="checkbox" id="fac" ${S.factura?'checked':''}><span><b>Necesito factura</b><span class="sub">Se suma el IVA (21%).</span></span></label>
+      <div class="sum num"><div><span>Subtotal sin IVA</span><span>${money(t.sub)}</span></div>${t.rec?`<div><span>Recargo 15%</span><span>${money(t.rec)}</span></div>`:''}${t.iva?`<div><span>IVA 21%</span><span>${money(t.iva)}</span></div>`:''}<div class="gt"><span>Total</span><span>${money(t.tot)}</span></div></div>
+      ${maxD?note('info',`Tu pedido estaría listo aprox. el <b>${fdate(addBiz(maxD))}</b>, desde que aprobás tus archivos.`):''}
+      <label class="field"><span>Tu nombre o el de tu negocio</span><input class="inp" id="cname" style="font-size:16px" placeholder="Ej: Panadería La Espiga" value="${esc(S.cname||'')}"></label>
+      ${note('warn','Demo: los precios corresponden a la lista de agosto 2026 y no están actualizados.')}
+      <details class="cond"><summary>Condiciones</summary>
+        <div>Con más de 30 días desde la fecha de entrega, el precio se actualiza a la lista vigente.</div>
+        <div>Para cancelar, escribí a imprentagradios@gmail.com. Sin mail, el trabajo sigue su proceso.</div>
+        ${lona?'<div>Lonas y vinilos: no se aceptan reclamos una vez retirados del local.</div>':''}
+        <div>Envíos al interior todos los días: consultá el costo.</div></details>`:''}
+    </div>
+    ${has?`<div class="df"><button class="btn primary block" data-a="send">Enviar pedido a Gradios</button><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn ghost" data-a="copy">Copiar mensaje</button><button class="btn ghost" data-a="toFile">Preparar archivo</button></div></div>`:''}
+  </aside>`;
+}
+document.addEventListener('input',e=>{if(e.target.id==='cname')S.cname=e.target.value;});
+function quoteText(){const t=totals();return `*Presupuesto Gradios N° ${String(S.quoteN).padStart(5,'0')}*\n${S.cname?'Cliente: '+S.cname+'\n':''}\n${S.cart.map(i=>`• ${i.title}: ${i.spec} — ${money(i.total)}`).join('\n')}\n\nSubtotal sin IVA: ${money(t.sub)}${t.rec?`\nRecargo 15%: ${money(t.rec)}`:''}${t.iva?`\nIVA 21%: ${money(t.iva)}`:''}\n*Total: ${money(t.tot)}*\nLista ${S.listName}.`;}
+async function copyQuote(){const txt=quoteText();try{await navigator.clipboard.writeText(txt);toast('Mensaje copiado. Pegalo en WhatsApp o en un mail.')}catch(_){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Mensaje copiado.')}catch(__){toast('No se pudo copiar automáticamente.')}ta.remove();}}
+function sendQuote(){
+  const t=totals(), n=S.quoteN;
+  S.orders.unshift({n,cli:S.cname||'Cliente web',job:S.cart.map(i=>i.title).join(' + '),total:t.tot,st:0,due:addBiz(S.cart.reduce((a,i)=>i.days?Math.max(a,i.days[1]):a,2)),cat:S.cart[0].cat,lona:S.cart.some(i=>i.file==='lona'),web:true,mult:1});
+  S.quoteN++; S.cart=[]; store.set('cart',S.cart); renderCartCount(); S.drawer=false; $('#sheet').innerHTML='';
+  toast(`Pedido N° ${String(n).padStart(5,'0')} enviado. Ya figura en el panel de la imprenta.`,['Ver panel','toAdmin']);
+}
+document.addEventListener('click',e=>{if(e.target.closest('[data-a="toAdmin"]')) location.hash='#/imprenta';});
+
+/* ============================== PREPARAR ARCHIVO ============================== */
+const CK=[
+  ['Todo el diseño en CMYK','Nada de RGB, Pantone ni paletas personalizadas.'],
+  ['Negro de textos: C0 M0 Y0 K100','Así las letras salen nítidas.'],
+  ['Negro de fondos: C40 M30 Y20 K100','Un negro profundo que seca bien.'],
+  ['Ningún color pasa el 220% de tinta','Si pasa, la tinta no seca y los pliegos se pegan.'],
+  ['Tipografías pasadas a curvas','Así las letras no cambian al abrir tu archivo.'],
+  ['3 mm de margen hacia adentro','Textos y logos lejos del borde. Margen, no demasía.'],
+  ['Imágenes en CMYK y a 300 dpi o más','Con menos resolución se ven pixeladas.'],
+  ['Lonas y vinilos: JPG o Corel X19 o anterior','Siempre en CMYK y con curvas. No recomendamos PDF: suele tener problemas de fuentes, colores y tamaños.'],
+  ['Lonas y vinilos: indicá el tamaño final','El archivo tiene que incluir los márgenes necesarios para la colocación.'],
+];
+function viewFile(){
+  return `<h1>Preparar mi archivo</h1>
+  <p class="lead">Si el archivo no cumple estos puntos, el color o la calidad pueden salir distintos a lo esperado. Si lo hace otra persona, pasale esta lista.</p>
+  <div class="stack">
+    <details class="card acc" open><summary><div style="flex:1"><h2>Lista para revisar</h2><small class="num" id="ckCount"></small></div>${I.chev}</summary><div class="in"><div class="progress"><i id="ckBar" style="width:0%"></i></div><div id="checklist" style="display:grid;gap:8px"></div><button class="btn ghost" data-a="copyck">Copiar la lista</button></div></details>
+    <details class="card acc"><summary><div style="flex:1"><h2>Probar mi archivo</h2><small>Revisa color y resolución sin subirlo a ningún lado.</small></div>${I.chev}</summary><div class="in">
+      <div class="sizeRow"><label class="field"><span>Ancho impreso (cm)</span><input class="inp num" id="fW" type="number" inputmode="decimal" min="1" value="100"></label><span class="times">×</span><label class="field"><span>Alto impreso (cm)</span><input class="inp num" id="fH" type="number" inputmode="decimal" min="1" value="70"></label></div>
+      <label class="drop" id="drop" for="file"><b>Elegí o soltá tu archivo acá</b><span>JPG, PNG, PDF o CDR</span><input id="file" type="file" accept=".jpg,.jpeg,.png,.pdf,.cdr,.tif,.tiff" hidden></label>
+      <div id="fres" style="display:grid;gap:8px"></div></div></details>
+    <details class="card acc"><summary><div style="flex:1"><h2>Calculadora de tinta</h2><small>Comprobá que un color no pase el 220%.</small></div>${I.chev}</summary><div class="in">
+      <div class="presets"><button data-a="tac" data-v="0,0,0,100">Negro de textos</button><button data-a="tac" data-v="40,30,20,100">Negro de fondos</button><button data-a="tac" data-v="75,68,67,90">Negro de Photoshop</button></div>
+      <div class="swatch" id="sw"></div>
+      <div style="display:grid;gap:4px">
+        <div class="sl"><span style="color:#0095d0">C</span><input type="range" min="0" max="100" id="tc" aria-label="Cian"><output id="oc" class="num"></output></div>
+        <div class="sl"><span style="color:#d4147c">M</span><input type="range" min="0" max="100" id="tm" aria-label="Magenta"><output id="om" class="num"></output></div>
+        <div class="sl"><span style="color:#b39b00">Y</span><input type="range" min="0" max="100" id="ty" aria-label="Amarillo"><output id="oy" class="num"></output></div>
+        <div class="sl"><span>K</span><input type="range" min="0" max="100" id="tk" aria-label="Negro"><output id="ok" class="num"></output></div>
+      </div><div id="tacMsg"></div></div></details>
+    <details class="card acc"><summary><div style="flex:1"><h2>Márgenes y variación de color</h2><small>Dos cosas que conviene saber.</small></div>${I.chev}</summary><div class="in">
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+        <svg width="132" height="92" viewBox="0 0 132 92" aria-label="Tarjeta con margen de seguridad de 3 mm"><rect x="6" y="6" width="120" height="80" rx="3" fill="#493185"/><rect x="18" y="18" width="96" height="56" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="1.4" stroke-dasharray="4 3"/><text x="24" y="42" fill="#fff" font-family="Poppins,sans-serif" font-weight="600" font-size="13">Tu texto</text><text x="66" y="14.5" fill="#6b667a" font-family="Poppins,sans-serif" font-weight="600" font-size="7" text-anchor="middle">3 mm</text></svg>
+        <p style="margin:0;flex:1;min-width:200px;color:var(--muted)">Dejá <b style="color:var(--ink)">3 mm de margen a la redonda</b> sin textos ni logos. Es margen hacia adentro, no demasía hacia afuera.</p></div>
+      <p style="margin:0;color:var(--muted)">Puede haber hasta un <b style="color:var(--ink)">15% de variación de color</b>. Por ejemplo, una tarjeta negra con letras en gris al 85% sale toda negra.</p></div></details>
+  </div>`;
+}
+function initFile(){
+  $('#checklist').innerHTML=CK.map(([b,s],i)=>`<label class="ck"><input type="checkbox" data-ck="${i}" ${S.ckDone.has(i)?'checked':''}><span><b>${b}</b>${s}</span></label>`).join('');
+  updCk(); renderTac();
+  $('#checklist').addEventListener('change',e=>{const i=+e.target.dataset.ck;e.target.checked?S.ckDone.add(i):S.ckDone.delete(i);updCk();if(S.ckDone.size===CK.length)toast('Todo listo. Ya podés enviar tu archivo.');});
+  ['c','m','y','k'].forEach((ch,i)=>$('#t'+ch).addEventListener('input',e=>{S.tac[i]=+e.target.value;renderTac();}));
+  $('#file').addEventListener('change',e=>takeFile(e.target.files[0]));
+  ['fW','fH'].forEach(id=>$('#'+id).addEventListener('input',renderFile));
+  const drop=$('#drop');
+  ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+  drop.addEventListener('drop',e=>takeFile(e.dataTransfer.files[0]));
+  FILE=null;
+}
+function updCk(){const n=S.ckDone.size;$('#ckCount').textContent=`${n} de ${CK.length} listos`;$('#ckBar').style.width=(n/CK.length*100)+'%';}
+function renderTac(){
+  if(!$('#sw')) return; const [c,m,y,k]=S.tac;
+  ['c','m','y','k'].forEach((ch,i)=>{$('#t'+ch).value=S.tac[i];$('#o'+ch).textContent=S.tac[i]+'%';});
+  const sum=c+m+y+k, R=255*(1-c/100)*(1-k/100),G=255*(1-m/100)*(1-k/100),B=255*(1-y/100)*(1-k/100);
+  const sw=$('#sw'); sw.style.background=`rgb(${R|0},${G|0},${B|0})`; sw.style.color=(R+G+B)/3>130?'#1f1b2e':'#fff'; sw.textContent=`Tinta total: ${sum}%`;
+  let msg;
+  if(sum>220) msg=note('bad',`<b>${sum}%: se pasa del límite de 220%.</b> La tinta no seca y los pliegos se pueden pegar. Bajá ${sum-220} puntos entre C, M o Y.`);
+  else if(c===0&&m===0&&y===0&&k===100) msg=note('ok','<b>Negro para textos.</b> Es el correcto.');
+  else if(c===40&&m===30&&y===20&&k===100) msg=note('ok','<b>Negro para fondos.</b> Suma 190%: profundo y seca bien.');
+  else msg=note('ok',`<b>${sum}%.</b> Dentro del límite de 220%.`);
+  $('#tacMsg').innerHTML=msg;
+}
+let FILE=null;
+async function analyze(file){
+  const ext=(file.name.split('.').pop()||'').toLowerCase(), out={name:file.name,ext,size:file.size};
+  const buf=new Uint8Array(await file.slice(0,Math.min(file.size,2*1024*1024)).arrayBuffer());
+  if(ext==='jpg'||ext==='jpeg'){
+    let i=2;
+    while(i<buf.length-9){
+      if(buf[i]!==0xFF){i++;continue}
+      const mk=buf[i+1], len=(buf[i+2]<<8)|buf[i+3];
+      if(mk>=0xC0&&mk<=0xCF&&![0xC4,0xC8,0xCC].includes(mk)){out.h=(buf[i+5]<<8)|buf[i+6];out.w=(buf[i+7]<<8)|buf[i+8];out.comp=buf[i+9];break}
+      if(mk===0xD8||mk===0x01||(mk>=0xD0&&mk<=0xD7)){i+=2;continue}
+      i+=2+len;
+    }
+    out.mode=out.comp===4?'CMYK':out.comp===1?'Escala de grises':out.comp===3?'RGB':null;
+  } else if(ext==='png'){out.w=(buf[16]<<24|buf[17]<<16|buf[18]<<8|buf[19])>>>0; out.h=(buf[20]<<24|buf[21]<<16|buf[22]<<8|buf[23])>>>0; out.mode='RGB';}
+  return out;
+}
+function renderFile(){
+  const box=$('#fres'); if(!box) return; if(!FILE){box.innerHTML='';return}
+  const f=FILE, W=+$('#fW').value||0, H=+$('#fH').value||0; let h=`<div style="font-weight:700;word-break:break-all">${esc(f.name)} <span style="color:var(--muted);font-weight:600">· ${(f.size/1048576).toFixed(1)} MB</span></div>`;
+  if(f.ext==='pdf') h+=note('warn','<b>PDF:</b> para lonas y vinilos no lo recomendamos, porque suele traer problemas de fuentes, colores y tamaños. Si lo mandás así, Gradios no se responsabiliza por el resultado. Mejor JPG o Corel X19.');
+  else if(f.ext==='cdr') h+=note('info','<b>Corel:</b> verificá que esté guardado en versión X19 o anterior, en CMYK y con los textos en curvas.');
+  if(f.mode) h+=f.mode==='CMYK'?note('ok','<b>Color CMYK.</b> Perfecto.'):f.mode==='RGB'?note('bad','<b>Está en RGB.</b> Convertilo a CMYK antes de enviarlo, o los colores van a cambiar al imprimir.'):note('info',`Modo de color: ${f.mode}.`);
+  if(f.w&&f.h){
+    if(W>0&&H>0){
+      const dpi=Math.min(f.w/(W/2.54),f.h/(H/2.54)), rf=f.w/f.h, rp=W/H;
+      h+=dpi>=300?note('ok',`<b>${Math.round(dpi)} dpi</b> a ${nf(W)} × ${nf(H)} cm. Resolución correcta.`):note('bad',`<b>${Math.round(dpi)} dpi</b> a ${nf(W)} × ${nf(H)} cm. Hacen falta 300 como mínimo: se va a ver pixelado.`);
+      if(Math.abs(rf-rp)/rp>.03) h+=note('warn',`La imagen tiene otra proporción que la medida pedida: se va a recortar o deformar.`);
+    }
+    h+=note('info',`${f.w} × ${f.h} px. A 300 dpi alcanza para imprimir hasta <b>${nf(f.w/300*2.54,1)} × ${nf(f.h/300*2.54,1)} cm</b>.`);
+  } else if(!['pdf','cdr'].includes(f.ext)) h+=note('info','No pudimos leer las dimensiones de este archivo.');
+  box.innerHTML=h;
+}
+async function takeFile(file){if(!file)return; FILE=await analyze(file); renderFile();}
+
+/* ============================== PANEL DE LA IMPRENTA ============================== */
+const STS=['Presupuestado','Confirmado','En producción','Listo para retirar','Entregado','Cancelado'];
+const daysAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return d};
+S.orders=[
+  {n:411,cli:'Panadería La Espiga',job:'Lona Front 300 × 150 cm con laqueado',total:63500,st:2,due:addBiz(1),cat:'giga',lona:true,mult:1},
+  {n:409,cli:'Estudio Pilates Core',job:'1000 tarjetas mate frente y dorso',total:31000,st:2,due:addBiz(12),cat:'offset',mult:1},
+  {n:407,cli:'Club Atlético Alberdi',job:'500 entradas en papel de 350 g',total:98000,st:1,due:addBiz(2),cat:'laser',mult:1},
+  {n:402,cli:'Ferretería Don Pepe',job:'Vinilo microperforado 180 × 90 cm',total:25100,st:3,due:daysAgo(4),cat:'giga',lona:true,mult:1},
+  {n:398,cli:'Lucía Ferreyra',job:'Roll Up 85 × 200 cm',total:59500,st:3,due:daysAgo(9),cat:'giga',lona:true,mult:1},
+  {n:371,cli:'Consultorio Dra. Paz',job:'2 talonarios medio oficio',total:16800,st:3,due:daysAgo(41),cat:'sobres',mult:.93},
+  {n:366,cli:'Bar El Patio',job:'2000 manteles individuales kraft',total:128300,st:3,due:daysAgo(52),cat:'sobres',mult:.93},
+  {n:390,cli:'Inmobiliaria Norte',job:'10 carteles de 100 × 68 cm',total:125000,st:4,due:daysAgo(12),cat:'giga',lona:true,mult:1},
+  {n:405,cli:'Kiosco 24',job:'500 imanes de 6 × 4 cm',total:52000,st:0,due:addBiz(3),cat:'laser',mult:1},
+];
+const isLate=o=>o.st===3&&(Date.now()-o.due.getTime())/864e5>30;
+const updTotal=o=>r100(o.total*S.mult[o.cat]/o.mult);
+const SAMPLES={
+  giga:[['Lona Front UV, por m²',11000],['Lona Front ecosolvente, por m²',8500],['Vinilo microperforado UV, por m²',15500],['Roll Up',59500],['Laqueado, por m²',6500]],
+  esp:[['Vinilo brillante impreso + corte, por m²',18500],['DTF UV, por metro',12000],['Vinilo especial, por metro',28000],['Esmerilado 60 cm, por metro',11000]],
+  laser:[['Copia super A3 130 g',1200],['10 carpetas A4',41000],['500 imanes',52000],['100 entradas de 350 g',23000]],
+  offset:[['1000 tarjetas frente y dorso',30000],['200 tarjetas, calidad máxima',18000],['2000 folletos 10 × 15',35000],['1000 folletos A4',169000]],
+  sobres:[['100 sobres oficio inglés, 1 color',55000],['10 talonarios medio oficio',46000],['2000 manteles individuales',143000]],
+};
+function viewAdmin(){
+  const O=S.orders; const act=O.filter(o=>o.st<4);
+  let list=O; if(S.ofilter==='activos')list=act; if(S.ofilter==='nuevos')list=O.filter(o=>o.st===0); if(S.ofilter==='retirar')list=O.filter(o=>o.st===3);
+  const F=[['activos','Activos'],['nuevos','Nuevos'],['retirar','Para retirar'],['todos','Todos']];
+  const late=O.filter(isLate).length;
+  return `<h1>Panel de la imprenta</h1>
+  <p class="lead">Los pedidos de tus clientes llegan acá solos. Seguís cada trabajo y actualizás la lista de precios en un solo lugar.</p>
+  <div class="kpis"><div class="kpi card"><small>Nuevos</small><b class="num">${O.filter(o=>o.st===0).length}</b></div><div class="kpi card"><small>En producción</small><b class="num">${O.filter(o=>o.st===2).length}</b></div><div class="kpi card ${late?'alert':''}"><small>Retiros vencidos</small><b class="num">${late}</b></div></div>
+  <div class="admin">
+    <div class="card panel"><h2>Trabajos<span class="demo">Ejemplo</span></h2>
+      <div class="chips">${F.map(([id,n])=>`<button class="chip" data-a="ofilter" data-id="${id}" aria-pressed="${S.ofilter===id}">${n}</button>`).join('')}</div>
+      <div>${list.map(o=>{const lt=isLate(o), nt=updTotal(o);
+        return `<div class="job"><div><b>${String(o.n).padStart(5,'0')} · ${esc(o.cli)}</b>${o.web?' <span class="pill" style="padding:2px 8px;font-size:12px">Web</span>':''}<div class="t">${esc(o.job)}</div><div class="t">Entrega: ${fdate(o.due)}</div>
+          ${lt?`<span class="flag">Retiro vencido hace ${Math.floor((Date.now()-o.due)/864e5)-30} días: se cobra a lista ${esc(S.listName)}</span>`:''}${o.st===4&&o.lona?`<span class="t" style="display:block;margin-top:4px">Lona o vinilo retirado: sin reclamos.</span>`:''}</div>
+          <div class="r num">${lt&&nt!==o.total?`<s style="color:var(--muted);font-weight:600">${money(o.total)}</s><br>${money(nt)}`:money(o.total)}<div style="margin-top:6px"><span class="st st-${o.st}">${STS[o.st]}</span></div></div>
+          ${S.cancelOpen===o.n?`<div class="cancelbox"><b>Las cancelaciones solo se aceptan por mail.</b>Escribí el asunto o la fecha del mail del cliente para dejarla asentada.<input id="cmail" placeholder="Ej: Cancelo pedido ${o.n}, 06/11 10:42"><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="mini no" data-a="cconf" data-id="${o.n}">Registrar cancelación</button><button class="mini" data-a="cx">Volver</button></div></div>`:`<div class="acts">${o.st<4?`<button class="mini go" data-a="adv" data-id="${o.n}">${['Confirmar','Pasar a producción','Marcar listo','Entregar'][o.st]}</button>`:''}${o.st<3?`<button class="mini no" data-a="can" data-id="${o.n}">Cancelar</button>`:''}</div>`}
+        </div>`}).join('')||`<div style="color:var(--muted);padding:16px 0">No hay trabajos en esta vista.</div>`}</div>
+    </div>
+    <div class="card panel"><h2>Lista de precios</h2>
+      <p style="margin:6px 0 0;color:var(--muted);font-size:14.5px">Ajustá un rubro y publicá. Los clientes ven los precios nuevos al instante.</p>
+      <div class="chips">${CATS.map(c=>`<button class="chip" data-a="pcat" data-id="${c.id}" aria-pressed="${S.pcat===c.id}">${c.n.split(',')[0].split(' y ')[0]}${S.mult[c.id]!==1?` <small>${S.mult[c.id]>1?'+':''}${Math.round((S.mult[c.id]-1)*100)}%</small>`:''}</button>`).join('')}</div>
+      <label class="field"><span>Ajuste: <b id="pPctTxt" style="color:var(--ink)">${S.pct>0?'+':''}${S.pct}%</b></span><input type="range" id="pPct" min="-10" max="40" step="1" value="${S.pct}" style="width:100%;min-height:36px;accent-color:var(--accent)" aria-label="Porcentaje de ajuste"></label>
+      <div id="pPrev" style="margin-top:6px"></div>
+      <label class="field" style="margin-top:14px"><span>Nombre de la lista</span><input class="inp" id="pName" style="font-size:16px" value="Noviembre 2026"></label>
+      <button class="btn primary block" style="margin-top:14px" data-a="pub">Publicar lista</button>
+    </div></div>`;
+}
+function renderPrev(){
+  $('#pPctTxt').textContent=(S.pct>0?'+':'')+S.pct+'%';
+  $('#pPrev').innerHTML=SAMPLES[S.pcat].map(([n,v])=>{const cur=price(S.pcat,v), nw=r100(v*S.mult[S.pcat]*(1+S.pct/100));return `<div class="pricerow num"><span>${n}</span>${S.pct?`<s>${money(cur)}</s>`:'<span></span>'}<b>${money(nw)}</b></div>`}).join('');
+}
+function initAdmin(){renderPrev(); $('#pPct').addEventListener('input',e=>{S.pct=+e.target.value;renderPrev();});}
+function publish(){
+  const nm=$('#pName').value.trim()||S.listName; S.mult[S.pcat]=S.mult[S.pcat]*(1+S.pct/100); S.listName=nm;
+  toast(`Lista ${esc(nm)} publicada. Los clientes ya ven los precios nuevos.`); S.pct=0; render();
+}
+
+renderCartCount(); render();
+</script>
+</body>
+</html>
